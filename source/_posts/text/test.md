@@ -136,3 +136,14 @@ message:  输入密码，查看文章
 6. [自制前端脚手架 - 腾讯Web前端](https://imweb.io/topic/59ffc48c1f0e50753869bf91)
 7. [如何写一个自己的脚手架](https://developers.weixin.qq.com/community/develop/article/doc/000e08e632c2f8847b39b67dc51813)
 8. [node-sass指定镜像地址](SASS_BINARY_SITE=https://npm.taobao.org/mirrors/node-sass/ yarn)
+
+### 九、Others
+
+查看端口占用情况及杀死进程：
+
+终端命令
+1、sudo lsof -i :9000    // beauty-web的前端端口号是 port: 9000
+COMMAND   PID        USER       FD      TYPE    DEVICE                      SIZE/OFF  NODE       NAME
+Node           50915     liuhaiba   14u     IPv4     0x9553c2e412ff5885     0t0              TCP        ocalhost:cslistener (LISTEN)然后根据PID杀进程：
+
+2、sudo kill -9 50915 // 杀死对应进程窗口
