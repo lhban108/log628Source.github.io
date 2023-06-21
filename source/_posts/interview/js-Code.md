@@ -1776,6 +1776,7 @@ iteratorPromise(arr);
 ### 3 promise 并发调度
 
 ```javaScript
+// 解法一
 // 实现一个并发请求的函数
 var jsonArr = ['api1.json', 'api2.json', 'api3.json', 'api4.json', 'api5.json', 'api6.json']
 
@@ -1812,6 +1813,104 @@ function fetchAll(jsonArr, limit) {
 		resolve(resList);
 	});
 }
+```
+
+
+```javaScript
+// 解法二：
+    var urls = [
+      'https://www.kkkk1000.com/images/getImgData/getImgDatadata.jpg',
+      'https://www.kkkk1000.com/images/getImgData/gray.gif',
+      'https://www.kkkk1000.com/images/getImgData/Particle.gif',
+      'https://www.kkkk1000.com/images/getImgData/arithmetic.png',
+      'https://www.kkkk1000.com/images/getImgData/arithmetic2.gif',
+      'https://www.kkkk1000.com/images/getImgData/getImgDataError.jpg',
+      'https://www.kkkk1000.com/images/getImgData/arithmetic.gif',
+      'https://www.kkkk1000.com/images/wxQrCode2.png'
+    ];
+
+    function loadImg(url) {
+      return new Promise((resolve, reject) => {
+        const img = new Image()
+        img.onload = function () {
+          console.log('一张图片加载完成');
+          resolve();
+        }
+        img.onerror = reject
+        img.src = url
+      })
+    };
+
+	function sendReq(urls, max) {
+		let num = 0;
+
+		function request() {
+			num = num + 1;
+			loadImg(urls.shift()).then(() => {
+				num = num - 1;
+			}).then(() => {
+				if (num < max && urls && urls.length > 0) {
+					request();
+				}
+			})
+		}
+
+		for (let i = 0; i < max; i++) {
+			request()
+		}
+	}
+```
+
+```javaScript
+// 解法三：
+    var urls = [
+		'https://www.kkkk1000.com/images/getImgData/getImgDatadata.jpg',
+		'https://www.kkkk1000.com/images/getImgData/gray.gif',
+		'https://www.kkkk1000.com/images/getImgData/Particle.gif',
+		'https://www.kkkk1000.com/images/getImgData/arithmetic.png',
+		'https://www.kkkk1000.com/images/getImgData/arithmetic2.gif',
+		'https://www.kkkk1000.com/images/getImgData/getImgDataError.jpg',
+		'https://www.kkkk1000.com/images/getImgData/arithmetic.gif',
+		'https://www.kkkk1000.com/images/wxQrCode2.png'
+    ];
+
+    function loadImg(url) {
+      return new Promise((resolve, reject) => {
+        const img = new Image()
+        img.onload = function () {
+          console.log('一张图片加载完成');
+          resolve();
+        }
+        img.onerror = reject
+        img.src = url
+      })
+    };
+
+	function sendReq(urls, max) {
+		let nums = 0;
+		const len = urls.length;
+		const lockArr = [];
+
+		async function request() {
+			if (nums >= max) {
+				await new Promise((resolve, reject) => {
+					lockArr.push(resolve);
+				})
+			}
+
+			if (urls.length) {
+				num++;
+				await loadImg(urls.shift());
+				num--;
+			}
+
+			lockArr.length && lockArr.shift()();
+		}
+
+		for (let i = 0; i < len; i++) {
+			request();
+		}
+	}
 ```
 
 ### 4 JavaScript 并发调度
@@ -1939,6 +2038,95 @@ function setIntervalFn(callBack, time) {
 mockInterval(() => {
 	console.log('call Back fn');
 }, 3000)
+```
+
+### 7 Promise 串行 —— 题一
+
+```javaScript
+// 题目
+const timeout = ms => new Promise((resolve, rejcet) => {
+	setTimeout(() => {
+		resolve();
+	}, ms)
+})
+
+const ajax1 = () => timeout(5000).then(() => {
+	console.log('1');
+	return 1;
+})
+
+const ajax2 = () => timeout(1000).then(() => {
+	console.log('2');
+	return 2;
+})
+
+const ajax3 = () => timeout(2000).then(() => {
+	console.log('3');
+	return 3;
+})
+
+const mergePromise => ajaxArray => {
+	// ...
+	// 在这里实现你的代码
+	// 要求分别输出：
+	// 1
+	// 2
+	// 3
+	// done
+	// [1, 2, 3]
+}
+
+mergePromise([ajax1, ajax2, ajax3]).then(data => {
+	console.log('done');
+	console.log(data); // data 为 [1, 2, 3]
+})
+
+// 题解一：
+const mergePromise => ajaxArray => {
+	// 该方法为串行执行，总执行时长为 (5000 + 1000 + 2000)ms 左右
+	// 该解法打印结果为：
+	// 1
+	// 2
+	// 3
+	// done
+	// [1, 2, 3]
+	const data = [];
+
+	let sequence = Promise.resolve();
+
+	for ( const item of ajaxArray) {
+		sequence = sequence.then(item).then(res => {
+			data.push(res);
+			return data;
+		})
+	}
+	return sequence;
+}
+
+// 题解二：
+const mergePromise => async ajaxArray => {
+	// 该方法为并行执行，总执行时长为 5000ms 左右
+	// 该解法打印结果为：
+	// 2
+	// 3
+	// 1
+	// done
+	// [1, 2, 3]
+	
+	const arr = [];
+	// 并发执行
+	const textPromises = urls.map(url => {
+		return url();
+	})
+
+	for (const proItem of textPromises) {
+		arr.push(await proItem);
+	}
+
+	return arr;
+}
+
+
 ```
 
 ## 五 函数/数组
